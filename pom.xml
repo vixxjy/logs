@@ -64,7 +64,7 @@
 						<version>1.12.1</version>
 						<configuration>
 							<nodeVersion>v4.6.0</nodeVersion>
-							<workingDirectory>src/front_end</workingDirectory>
+							<workingDirectory>src/webapp</workingDirectory>
 						</configuration>
 						<executions>
 							<execution>
@@ -109,7 +109,7 @@
 								<configuration>
 									<resources>
 										<resource>
-											<directory>src/front_end/build</directory>
+											<directory>src/webapp/build</directory>
 										</resource>
 
 									</resources>
