@@ -35,6 +35,7 @@ build/
 ### react modules ####
 # dependencies
 node_modules
+node
 /.pnp
 .pnp.js
 logistics/src/main/resources/static/*
