@@ -22,7 +22,7 @@ public class HomeController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserService userService;
-    @GetMapping("/")
+    @GetMapping("/home")
     public String home() {
         return "Welcome home";
     }
