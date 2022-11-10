@@ -21,7 +21,7 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/home")
+    @GetMapping("/welcome")
     public String home() {
         return "Welcome home";
     }
