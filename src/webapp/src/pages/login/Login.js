@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -8,29 +9,36 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-
-const Copyright = (props) => {
-    return (
-      <Typography variant="body2" color="text.secondary" align="center" {...props}>
-        {'Copyright © '}
-          Logistics
-        {' '}
-        {new Date().getFullYear()}
-        {'.'}
-      </Typography>
-    );
-}
-
+import Copyright from '../partials/copyRight';
+import { AuthUserSession } from '../../utilies/AuthContext';
+import { signIn } from "../../requests/AuthRequest"
 
 const Login = () => {
+    const { login } = AuthUserSession();
+    const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-          email: data.get('email'),
-          password: data.get('password'),
-        });
+        try {
+            const data = new FormData(event.currentTarget);
+            let authData = {
+                username: data.get('email'),
+                password: data.get('password'),
+            }
+    
+            await signIn(authData).then(
+                () => {
+                    login(data.get('email').slice("@"))
+                
+                    navigate('/home');
+                },
+                (error) => {
+                    console.log("login", error)
+                }
+            )
+        } catch(err) {
+            console.log(err)
+        }   
     };
 
     return (

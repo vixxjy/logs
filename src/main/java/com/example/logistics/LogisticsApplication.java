@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class LogisticsApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(LogisticsApplication.class, args);
 	}
