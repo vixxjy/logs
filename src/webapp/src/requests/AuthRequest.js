@@ -3,12 +3,12 @@ import { URL } from '../utilies/Url'
 import authHeader from '../utilies/request_header'
 
 export const signIn = authData => {
-    return axios.post(`${URL}/signin`, authData)
+    return axios.post(`${URL}/auth/signin`, authData)
     .then(function (response) {
         if (response.status === 200) {
             localStorage.setItem("user", JSON.stringify(response.data));
+            return response;
         }
-        return response.data;
     })
     .catch(function (error) {
         return error;

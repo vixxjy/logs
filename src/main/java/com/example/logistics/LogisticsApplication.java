@@ -12,9 +12,4 @@ public class LogisticsApplication {
 		SpringApplication.run(LogisticsApplication.class, args);
 	}
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
-	}
-
 }

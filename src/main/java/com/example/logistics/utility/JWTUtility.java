@@ -1,9 +1,10 @@
 package com.example.logistics.utility;
 
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.logistics.model.User;
+import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,10 @@ public class JWTUtility implements Serializable {
     private static final long serialVersionUID = 234234523523L;
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+
+    private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JWTUtility.class);
 
     @Value("{jwt.secret}")
     private String secretKey;
@@ -75,5 +80,45 @@ public class JWTUtility implements Serializable {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String getGeneratedToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getId() + "-" + user.getEmail())
+                .setIssuer("Logistics")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE_DURATION))
+                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .compact();
+    }
+
+    public boolean getValidatedToken(String token) {
+        try{
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException ex) {
+            LOGGER.error("JWT expired", ex);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.error("Token is empty", ex);
+        } catch (MalformedJwtException ex) {
+            LOGGER.error("JWT is invalid", ex);
+        } catch (UnsupportedJwtException ex) {
+            LOGGER.error("JWT not supported", ex);
+        } catch (SignatureException ex) {
+            LOGGER.error("JWT signature validation failed", ex);
+        }
+
+        return false;
+    }
+
+    public String getSubject(String token) {
+        return getParseClaims(token).getSubject();
+    }
+
+    private Claims getParseClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

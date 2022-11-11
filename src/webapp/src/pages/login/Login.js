@@ -22,15 +22,18 @@ const Login = () => {
         try {
             const data = new FormData(event.currentTarget);
             let authData = {
-                username: data.get('email'),
+                email: data.get('email'),
                 password: data.get('password'),
             }
     
             await signIn(authData).then(
-                () => {
-                    login(data.get('email').slice("@"))
-                
-                    navigate('/home');
+                (resp) => {
+                    if (resp.status === 200) {
+                        login(resp.data.name)
+                         navigate('/home');
+                    }else if (resp.response.status === 401) {
+                        navigate('/');
+                    }
                 },
                 (error) => {
                     console.log("login", error)

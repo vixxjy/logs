@@ -2,17 +2,22 @@ package com.example.logistics.controller;
 
 import com.example.logistics.model.JwtRequest;
 import com.example.logistics.model.JwtResponse;
+import com.example.logistics.model.User;
 import com.example.logistics.service.UserService;
 import com.example.logistics.utility.JWTUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
+@RequestMapping(value = "/auth")
 public class AuthController {
     @Autowired
     private JWTUtility jwtUtility;
@@ -27,25 +32,29 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public JwtResponse authenticate(@RequestBody JwtRequest jwtRequest) throws Exception{
+    public ResponseEntity<?> authenticate(@RequestBody JwtRequest jwtRequest) throws Exception{
 
         try {
-            authenticationManager.authenticate(
+            Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            jwtRequest.getUsername(),
+                            jwtRequest.getEmail(),
                             jwtRequest.getPassword()
                     )
             );
+
+            User user = (User) authentication.getPrincipal();
+
+            final String accessToken =
+                jwtUtility.getGeneratedToken(user);
+
+            JwtResponse authResponse = new JwtResponse(user.getName(), user.getEmail(), accessToken);
+
+            System.out.println(authResponse);
+
+            return ResponseEntity.ok(authResponse);
+
         } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        final UserDetails userDetails
-                = userService.loadUserByUsername(jwtRequest.getUsername());
-
-        final String token =
-                jwtUtility.generateToken(userDetails);
-
-        return  new JwtResponse(token);
     }
 }
