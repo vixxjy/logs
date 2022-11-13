@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 import java.util.List;
 
@@ -16,11 +17,13 @@ public class AccountController {
     private AccountRepository accountRepository;
 
     @GetMapping
+    @RolesAllowed({"Admin", "Founder"})
     public List<Account> getAccounts() {
         return accountRepository.findAll();
     }
 
     @PostMapping
+    @RolesAllowed("Admin")
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
         Account savedAccount = accountRepository.save(account);
         URI accountUrl = URI.create("/account/" + savedAccount.getId());

@@ -85,6 +85,7 @@ public class JWTUtility implements Serializable {
     public String getGeneratedToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getId() + "-" + user.getEmail())
+                .claim("roles", user.getRoles().toString())
                 .setIssuer("Logistics")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRE_DURATION))
@@ -115,7 +116,7 @@ public class JWTUtility implements Serializable {
         return getParseClaims(token).getSubject();
     }
 
-    private Claims getParseClaims(String token) {
+    public Claims getParseClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)

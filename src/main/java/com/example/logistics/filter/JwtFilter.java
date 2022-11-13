@@ -1,8 +1,10 @@
 package com.example.logistics.filter;
 
+import com.example.logistics.model.Role;
 import com.example.logistics.model.User;
 import com.example.logistics.service.UserService;
 import com.example.logistics.utility.JWTUtility;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
         UserDetails userDetails = getUserDetails(accessToken);
 
         UsernamePasswordAuthenticationToken authentication
-                = new UsernamePasswordAuthenticationToken(userDetails, null, null);
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
@@ -58,7 +60,23 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private UserDetails getUserDetails(String accessToken) {
         User userDetails = new User();
-        String[] subjectArray = jwtUtility.getSubject(accessToken).split("-");
+        Claims claims = jwtUtility.getParseClaims(accessToken);
+
+        String claimRoles = (String) claims.get("roles");
+
+        System.out.println("claimed roles " + claimRoles);
+
+        claimRoles = claimRoles.replace("[", "")
+                .replace("]", "");
+        String[] roleNames = claimRoles.split(",");
+
+        for (String roleName : roleNames ) {
+            System.out.println(roleName);
+            userDetails.addRole(new Role(roleName));
+        }
+
+        String subject = (String) claims.get(Claims.SUBJECT);
+        String[] subjectArray = subject.split("-");
 
         userDetails.setId(Integer.parseInt(subjectArray[0]));
         userDetails.setEmail(subjectArray[1]);
